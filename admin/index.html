@@ -375,7 +375,7 @@
                         <div>
                             <p class="text-slate-500 font-bold uppercase tracking-wider text-[10px]">Base Price</p>
                             <div class="flex items-center gap-2 mt-0.5">
-                                <span id="modal-base-price" class="text-white font-mono font-bold">₹20.0 Lakh</span>
+                                <span id="modal-base-price" class="text-white font-mono font-bold">20.0 Pts</span>
                                 <button type="button" id="modal-edit-price-btn" class="text-[11px] text-lime-400 hover:text-white font-semibold underline cursor-pointer">Edit</button>
                             </div>
                         </div>
@@ -494,10 +494,9 @@
                                 <p class="text-[11px] text-slate-500">Top-order and middle-order specialist</p>
                             </div>
                             <div class="flex items-center gap-2">
-                                <span class="text-slate-400 font-bold">₹</span>
                                 <input id="price-batter" type="number" min="0" step="0.5" value="20" required
                                     class="w-20 bg-slate-900 border border-slate-700 text-white font-bold rounded-xl px-2.5 py-1.5 text-center text-xs focus:ring-2 focus:ring-lime-400 focus:border-lime-400 outline-none">
-                                <span class="text-slate-400 font-bold">Lakh</span>
+                                <span class="text-slate-400 font-bold">Pts</span>
                             </div>
                         </div>
 
@@ -508,10 +507,9 @@
                                 <p class="text-[11px] text-slate-500">Fast, pace, and spin specialist</p>
                             </div>
                             <div class="flex items-center gap-2">
-                                <span class="text-slate-400 font-bold">₹</span>
                                 <input id="price-bowler" type="number" min="0" step="0.5" value="5" required
                                     class="w-20 bg-slate-900 border border-slate-700 text-white font-bold rounded-xl px-2.5 py-1.5 text-center text-xs focus:ring-2 focus:ring-lime-400 focus:border-lime-400 outline-none">
-                                <span class="text-slate-400 font-bold">Lakh</span>
+                                <span class="text-slate-400 font-bold">Pts</span>
                             </div>
                         </div>
 
@@ -522,10 +520,9 @@
                                 <p class="text-[11px] text-slate-500">Batting and bowling capability</p>
                             </div>
                             <div class="flex items-center gap-2">
-                                <span class="text-slate-400 font-bold">₹</span>
                                 <input id="price-allrounder" type="number" min="0" step="0.5" value="15" required
                                     class="w-20 bg-slate-900 border border-slate-700 text-white font-bold rounded-xl px-2.5 py-1.5 text-center text-xs focus:ring-2 focus:ring-lime-400 focus:border-lime-400 outline-none">
-                                <span class="text-slate-400 font-bold">Lakh</span>
+                                <span class="text-slate-400 font-bold">Pts</span>
                             </div>
                         </div>
 
@@ -536,10 +533,9 @@
                                 <p class="text-[11px] text-slate-500">Keeper and top gloveman</p>
                             </div>
                             <div class="flex items-center gap-2">
-                                <span class="text-slate-400 font-bold">₹</span>
                                 <input id="price-wicketkeeper" type="number" min="0" step="0.5" value="10" required
                                     class="w-20 bg-slate-900 border border-slate-700 text-white font-bold rounded-xl px-2.5 py-1.5 text-center text-xs focus:ring-2 focus:ring-lime-400 focus:border-lime-400 outline-none">
-                                <span class="text-slate-400 font-bold">Lakh</span>
+                                <span class="text-slate-400 font-bold">Pts</span>
                             </div>
                         </div>
 
@@ -550,16 +546,15 @@
                                 <p class="text-[11px] text-slate-500">Outfield and athletic cover</p>
                             </div>
                             <div class="flex items-center gap-2">
-                                <span class="text-slate-400 font-bold">₹</span>
                                 <input id="price-fielder" type="number" min="0" step="0.5" value="5" required
                                     class="w-20 bg-slate-900 border border-slate-700 text-white font-bold rounded-xl px-2.5 py-1.5 text-center text-xs focus:ring-2 focus:ring-lime-400 focus:border-lime-400 outline-none">
-                                <span class="text-slate-400 font-bold">Lakh</span>
+                                <span class="text-slate-400 font-bold">Pts</span>
                             </div>
                         </div>
                     </div>
 
                     <div class="p-3 bg-slate-950/60 rounded-xl border border-slate-800 text-[11px] text-slate-400 flex items-center justify-between">
-                        <span>💡 Example: Batsman 20 Lakh, Bowler 5 Lakh</span>
+                        <span>💡 Example: Batsman 20 Pts, Bowler 5 Pts</span>
                         <button type="button" onclick="applyRolePricesToAllPlayers()" class="text-lime-400 hover:underline font-bold">Apply to All Roster</button>
                     </div>
 
@@ -612,7 +607,7 @@
                         </div>
                         <div class="text-right shrink-0">
                             <p class="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Base Price</p>
-                            <p id="purchase-player-base" class="text-sm font-black text-lime-400 font-mono">₹20.0 L</p>
+                            <p id="purchase-player-base" class="text-sm font-black text-lime-400 font-mono">20.0 Pts</p>
                         </div>
                     </div>
 
@@ -631,15 +626,14 @@
                     <div>
                         <div class="flex items-center justify-between mb-2">
                             <label for="purchase-price-input" class="text-xs font-bold uppercase tracking-wider text-slate-400">
-                                Purchase Price (in Lakhs)
+                                Purchase Price (in Points)
                             </label>
                             <span class="text-[11px] text-slate-500">Min: Player Base Price</span>
                         </div>
                         <div class="relative">
-                            <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-lime-400 font-bold text-sm">₹</span>
                             <input id="purchase-price-input" type="number" min="1" step="0.5" oninput="updatePurchaseBalancePreview()" required
-                                class="bg-slate-950 border border-slate-800 text-white text-sm font-bold rounded-xl focus:ring-2 focus:ring-lime-400/20 focus:border-lime-400 block w-full pl-8 pr-16 py-3.5 outline-none transition-all">
-                            <span class="absolute inset-y-0 right-0 flex items-center pr-3.5 pointer-events-none text-slate-400 text-xs font-bold">Lakh</span>
+                                class="bg-slate-950 border border-slate-800 text-white text-sm font-bold rounded-xl focus:ring-2 focus:ring-lime-400/20 focus:border-lime-400 block w-full px-4 py-3.5 outline-none transition-all">
+                            <span class="absolute inset-y-0 right-0 flex items-center pr-3.5 pointer-events-none text-slate-400 text-xs font-bold">Pts</span>
                         </div>
                     </div>
 
@@ -647,15 +641,15 @@
                     <div id="purchase-preview-card" class="p-4 rounded-2xl bg-slate-950 border border-slate-800/80 space-y-2.5 text-xs">
                         <div class="flex items-center justify-between text-slate-400">
                             <span>Current Team Leftover Balance:</span>
-                            <span id="preview-current-balance" class="font-bold text-white font-mono">₹100.0 Lakh</span>
+                            <span id="preview-current-balance" class="font-bold text-white font-mono">100.0 Points</span>
                         </div>
                         <div class="flex items-center justify-between text-slate-400">
                             <span>Purchase Deduction:</span>
-                            <span id="preview-deduction" class="font-bold text-rose-400 font-mono">- ₹20.0 Lakh</span>
+                            <span id="preview-deduction" class="font-bold text-rose-400 font-mono">- 20.0 Points</span>
                         </div>
                         <div class="border-t border-slate-800 pt-2 flex items-center justify-between font-bold">
                             <span class="text-slate-200">Balance After Purchase:</span>
-                            <span id="preview-new-balance" class="text-emerald-400 text-sm font-black font-mono">₹80.0 Lakh</span>
+                            <span id="preview-new-balance" class="text-emerald-400 text-sm font-black font-mono">80.0 Points</span>
                         </div>
                         <p id="purchase-error-msg" class="hidden text-rose-400 font-semibold text-[11px] pt-1">⚠️ Error message</p>
                     </div>
@@ -685,10 +679,9 @@
                 <p id="edit-base-player-name" class="text-xs text-slate-400 font-semibold truncate">Athlete Name</p>
                 <form id="edit-base-price-form" onsubmit="handleSavePlayerBasePrice(event)" class="space-y-4">
                     <div class="relative">
-                        <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-lime-400 font-bold text-sm">₹</span>
                         <input id="edit-base-price-input" type="number" min="0" step="0.5" required
-                            class="bg-slate-950 border border-slate-800 text-white text-sm font-bold rounded-xl focus:ring-2 focus:ring-lime-400 focus:border-lime-400 block w-full pl-8 pr-16 py-3 outline-none">
-                        <span class="absolute inset-y-0 right-0 flex items-center pr-3.5 pointer-events-none text-slate-400 text-xs font-bold">Lakh</span>
+                            class="bg-slate-950 border border-slate-800 text-white text-sm font-bold rounded-xl focus:ring-2 focus:ring-lime-400 focus:border-lime-400 block w-full px-4 py-3 outline-none">
+                        <span class="absolute inset-y-0 right-0 flex items-center pr-3.5 pointer-events-none text-slate-400 text-xs font-bold">Pts</span>
                     </div>
                     <div class="flex items-center justify-end gap-2">
                         <button type="button" onclick="closeEditBasePriceModal()" class="text-xs font-bold text-slate-400 px-3 py-2 rounded-xl border border-slate-800 hover:bg-slate-800">Cancel</button>
@@ -709,7 +702,7 @@
                         <span id="team-squad-logo" class="text-3xl p-2 rounded-2xl bg-slate-800 border border-slate-700">🏏</span>
                         <div>
                             <h3 id="team-squad-name" class="text-lg font-black text-white uppercase">Franchise Squad</h3>
-                            <p id="team-squad-meta" class="text-xs text-slate-400">Purse: ₹100L • Spent: ₹0L • Leftover: ₹100L</p>
+                            <p id="team-squad-meta" class="text-xs text-slate-400">Purse: 100 Pts • Spent: 0 Pts • Leftover: 100 Pts</p>
                         </div>
                     </div>
                     <button type="button" onclick="closeTeamSquadModal()" class="text-slate-400 hover:text-white rounded-xl text-sm w-8 h-8 inline-flex justify-center items-center hover:bg-slate-800 cursor-pointer">
@@ -722,15 +715,15 @@
                     <div class="grid grid-cols-3 gap-3 text-center text-xs">
                         <div class="p-3 rounded-2xl bg-slate-950 border border-slate-800">
                             <p class="text-slate-500 uppercase font-bold text-[10px]">Total Purse</p>
-                            <p id="team-stat-purse" class="text-base font-black text-white mt-0.5">₹100.0 L</p>
+                            <p id="team-stat-purse" class="text-base font-black text-white mt-0.5">100.0 Pts</p>
                         </div>
                         <div class="p-3 rounded-2xl bg-slate-950 border border-slate-800">
                             <p class="text-slate-500 uppercase font-bold text-[10px]">Spent</p>
-                            <p id="team-stat-spent" class="text-base font-black text-rose-400 mt-0.5">₹0.0 L</p>
+                            <p id="team-stat-spent" class="text-base font-black text-rose-400 mt-0.5">0.0 Pts</p>
                         </div>
                         <div class="p-3 rounded-2xl bg-slate-950 border border-slate-800">
                             <p class="text-slate-500 uppercase font-bold text-[10px]">Leftover Balance</p>
-                            <p id="team-stat-balance" class="text-base font-black text-emerald-400 mt-0.5">₹100.0 L</p>
+                            <p id="team-stat-balance" class="text-base font-black text-emerald-400 mt-0.5">100.0 Pts</p>
                         </div>
                     </div>
 

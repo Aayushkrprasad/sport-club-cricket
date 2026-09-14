@@ -32,8 +32,8 @@ try {
     console.warn('Supabase initialization error:', err);
 }
 
-// 3. DEFAULT ROLE BASE PRICES (In Lakhs)
-// Batsman: 20 Lakh, Bowler: 5 Lakh, All-Rounder: 15 Lakh, etc.
+// 3. DEFAULT ROLE BASE PRICES (In Points)
+// Batsman: 20 Points, Bowler: 5 Points, All-Rounder: 15 Points, etc.
 const DEFAULT_ROLE_BASE_PRICES = {
     'Batter': 20,
     'Batsman': 20,
@@ -43,7 +43,7 @@ const DEFAULT_ROLE_BASE_PRICES = {
     'Fielder': 5
 };
 
-// 4. DEFAULT TOURNAMENT TEAMS (Purse: 100 Lakhs each)
+// 4. DEFAULT TOURNAMENT TEAMS (Purse: 100 Points each)
 const DEFAULT_TEAMS = [
     { id: 'team-btech', name: 'B.Tech Titans', department: 'B.Tech', logo: '⚡', color: '#38bdf8', total_budget: 100 },
     { id: 'team-bca', name: 'BCA Blasters', department: 'BCA', logo: '🏏', color: '#a3e635', total_budget: 100 },
@@ -489,7 +489,7 @@ const UniBoxDb = {
         }
 
         if (numPrice > targetTeam.leftover_balance) {
-            throw new Error(`Insufficient budget! ${targetTeam.name} has only ₹${targetTeam.leftover_balance} Lakh remaining, but purchase price is ₹${numPrice} Lakh.`);
+            throw new Error(`Insufficient budget! ${targetTeam.name} has only ${targetTeam.leftover_balance} Points remaining, but purchase price is ${numPrice} Points.`);
         }
 
         // Update local auction cache

@@ -132,9 +132,8 @@ function renderTeamBalanceHUD() {
                 <div class="my-3">
                     <p class="text-[10px] uppercase font-bold tracking-wider text-slate-500">Leftover Balance</p>
                     <div class="flex items-baseline gap-1 mt-0.5">
-                        <span class="text-xs font-bold text-emerald-400">₹</span>
                         <span class="text-2xl font-black text-emerald-400 font-mono tracking-tight">${leftover.toFixed(1)}</span>
-                        <span class="text-xs text-slate-400 font-bold">Lakh</span>
+                        <span class="text-xs text-slate-400 font-bold">Pts</span>
                     </div>
                 </div>
 
@@ -144,7 +143,7 @@ function renderTeamBalanceHUD() {
                         <div class="bg-gradient-to-r from-lime-400 to-emerald-400 h-full transition-all duration-500" style="width: ${100 - spentPct}%"></div>
                     </div>
                     <div class="flex items-center justify-between text-[10px] text-slate-500 font-semibold">
-                        <span>Spent: ₹${spent.toFixed(1)}L</span>
+                        <span>Spent: ${spent.toFixed(1)} Pts</span>
                         <span class="text-slate-400 font-bold">👥 ${squadCount}/7</span>
                     </div>
                 </div>
@@ -328,7 +327,7 @@ function renderRosterTable() {
             auctionBadge = `
                 <div class="flex items-center gap-1.5">
                     <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-black bg-emerald-400/10 text-emerald-400 border border-emerald-400/30">
-                        🏆 Sold: ${soldTeam} (₹${soldPrice}L)
+                        🏆 Sold: ${soldTeam} (${soldPrice} Pts)
                     </span>
                 </div>
             `;
@@ -344,7 +343,7 @@ function renderRosterTable() {
         const basePriceHtml = `
             <div class="flex items-center gap-1.5">
                 <span class="font-mono font-bold text-lime-400 text-xs bg-lime-400/5 px-2 py-1 rounded-md border border-lime-400/20">
-                    ₹${basePrice.toFixed(1)} L
+                    ${basePrice.toFixed(1)} Pts
                 </span>
                 <button type="button" onclick="openEditBasePriceModal('${id}')"
                     class="text-slate-500 hover:text-white p-1 rounded hover:bg-slate-800 transition-colors" title="Edit Base Price">
@@ -548,7 +547,7 @@ function openAthleteModal(playerId) {
 
     const defaultRolePrice = window.UniBoxDb ? window.UniBoxDb.getDefaultBasePriceForRole(player.player_role) : 15;
     const basePrice = (player.base_price !== undefined && player.base_price !== null) ? Number(player.base_price) : defaultRolePrice;
-    modalBasePrice.textContent = `₹${basePrice.toFixed(1)} Lakh`;
+    modalBasePrice.textContent = `${basePrice.toFixed(1)} Pts`;
 
     const editPriceBtn = document.getElementById('modal-edit-price-btn');
     if (editPriceBtn) {
@@ -557,7 +556,7 @@ function openAthleteModal(playerId) {
 
     const isSold = player.auction_status === 'Sold' || Boolean(player.sold_to_team);
     if (isSold) {
-        modalAuctionStatus.textContent = `Sold to ${player.sold_to_team} (₹${player.sold_price} Lakh)`;
+        modalAuctionStatus.textContent = `Sold to ${player.sold_to_team} (${player.sold_price} Pts)`;
         modalAuctionStatus.className = 'text-emerald-400 font-bold mt-0.5 text-xs';
         if (modalPurchaseBtn) modalPurchaseBtn.classList.add('hidden');
     } else {
@@ -635,7 +634,7 @@ function closeAthleteModal() {
 }
 
 // ==============================================================================
-// 10. ROLE BASE PRICE CONFIGURATION (Batsman 20 Lakh, Bowler 5 Lakh, etc.)
+// 10. ROLE BASE PRICE CONFIGURATION (Batsman 20 Pts, Bowler 5 Pts, etc.)
 // ==============================================================================
 function openBasePriceModal() {
     const modal = document.getElementById('base-price-modal');
@@ -682,7 +681,7 @@ function handleSaveBasePrices(e) {
 
     window.UniBoxDb.saveRoleBasePrices(newPrices);
     closeBasePriceModal();
-    showToast('Role base prices updated! (Batsman: ₹' + newPrices.Batter + 'L, Bowler: ₹' + newPrices.Bowler + 'L)', 'success');
+    showToast('Role base prices updated! (Batsman: ' + newPrices.Batter + ' Pts, Bowler: ' + newPrices.Bowler + ' Pts)', 'success');
     loadRosterData(false);
 }
 
@@ -747,12 +746,12 @@ async function handleSavePlayerBasePrice(e) {
 
     activeEditBasePlayer.base_price = inputVal;
     if (activeModalPlayer && (activeModalPlayer.id === playerId || activeModalPlayer.email === playerId)) {
-        modalBasePrice.textContent = `₹${inputVal.toFixed(1)} Lakh`;
+        modalBasePrice.textContent = `${inputVal.toFixed(1)} Pts`;
     }
 
     closeEditBasePriceModal();
     renderRosterTable();
-    showToast(`Base price for ${activeEditBasePlayer.full_name || activeEditBasePlayer.name} updated to ₹${inputVal} Lakh!`, 'success');
+    showToast(`Base price for ${activeEditBasePlayer.full_name || activeEditBasePlayer.name} updated to ${inputVal} Points!`, 'success');
 }
 
 // ==============================================================================
@@ -779,7 +778,7 @@ function openPurchaseModal(playerId) {
     document.getElementById('purchase-player-role').textContent = player.player_role || 'Athlete';
 
     const basePrice = player.base_price !== undefined ? Number(player.base_price) : 20;
-    document.getElementById('purchase-player-base').textContent = `₹${basePrice.toFixed(1)} L`;
+    document.getElementById('purchase-player-base').textContent = `${basePrice.toFixed(1)} Pts`;
 
     const photoImg = document.getElementById('purchase-player-photo');
     const avatarIcon = document.getElementById('purchase-player-avatar');
@@ -797,7 +796,7 @@ function openPurchaseModal(playerId) {
     const teamSelect = document.getElementById('purchase-team-select');
     teamSelect.innerHTML = `<option value="" disabled selected>Choose a franchise...</option>` + allTeams.map(t => {
         const ownerTag = t.owner_name ? ` [Owner: ${t.owner_name}]` : '';
-        return `<option value="${t.id}">${t.logo} ${t.name}${ownerTag} (Leftover Purse: ₹${t.leftover_balance.toFixed(1)} Lakh)</option>`;
+        return `<option value="${t.id}">${t.logo} ${t.name}${ownerTag} (Leftover Purse: ${t.leftover_balance.toFixed(1)} Points)</option>`;
     }).join('');
 
     // Pre-select first team if available
@@ -852,7 +851,7 @@ function updatePurchaseBalancePreview() {
 
     if (!team) {
         curBalEl.textContent = '---';
-        dedEl.textContent = `₹${purchasePrice.toFixed(1)} Lakh`;
+        dedEl.textContent = `${purchasePrice.toFixed(1)} Points`;
         newBalEl.textContent = '---';
         return;
     }
@@ -860,18 +859,18 @@ function updatePurchaseBalancePreview() {
     const currentBalance = team.leftover_balance;
     const newBalance = currentBalance - purchasePrice;
 
-    curBalEl.textContent = `₹${currentBalance.toFixed(1)} Lakh`;
-    dedEl.textContent = `- ₹${purchasePrice.toFixed(1)} Lakh`;
-    newBalEl.textContent = `₹${newBalance.toFixed(1)} Lakh`;
+    curBalEl.textContent = `${currentBalance.toFixed(1)} Points`;
+    dedEl.textContent = `- ${purchasePrice.toFixed(1)} Points`;
+    newBalEl.textContent = `${newBalance.toFixed(1)} Points`;
 
     if (purchasePrice < basePrice) {
-        errorEl.textContent = `⚠️ Price cannot be lower than player's base price of ₹${basePrice} Lakh.`;
+        errorEl.textContent = `⚠️ Price cannot be lower than player's base price of ${basePrice} Points.`;
         errorEl.classList.remove('hidden');
         newBalEl.className = 'text-rose-400 text-sm font-black font-mono';
         submitBtn.disabled = true;
         submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
     } else if (newBalance < 0) {
-        errorEl.textContent = `⚠️ Insufficient budget! ${team.name} only has ₹${currentBalance.toFixed(1)} Lakh remaining.`;
+        errorEl.textContent = `⚠️ Insufficient budget! ${team.name} only has ${currentBalance.toFixed(1)} Points remaining.`;
         errorEl.classList.remove('hidden');
         newBalEl.className = 'text-rose-400 text-sm font-black font-mono';
         submitBtn.disabled = true;
@@ -913,7 +912,7 @@ async function handleExecutePurchase(e) {
         await loadTeamsData();
         renderRosterTable();
 
-        showToast(`🎉 ${playerName} purchased by ${result.team.name} for ₹${soldPrice} Lakh! Remaining Purse: ₹${result.team.leftover_balance.toFixed(1)} Lakh`, 'success');
+        showToast(`🎉 ${playerName} purchased by ${result.team.name} for ${soldPrice} Points! Remaining Purse: ${result.team.leftover_balance.toFixed(1)} Points`, 'success');
     } catch (err) {
         console.error('Purchase failed:', err);
         showToast(err.message || 'Failed to complete player purchase', 'error');
@@ -927,7 +926,7 @@ async function handleRevokePurchase(playerId) {
     const teamName = player?.sold_to_team || 'the franchise';
     const price = player?.sold_price || 0;
 
-    if (!confirm(`Are you sure you want to revoke the purchase of ${playerName}? ₹${price} Lakh will be immediately refunded to ${teamName}'s leftover balance.`)) {
+    if (!confirm(`Are you sure you want to revoke the purchase of ${playerName}? ${price} Points will be immediately refunded to ${teamName}'s leftover balance.`)) {
         return;
     }
 
@@ -945,7 +944,7 @@ async function handleRevokePurchase(playerId) {
 
         await loadTeamsData();
         renderRosterTable();
-        showToast(`Sale revoked. ₹${price} Lakh refunded to ${teamName}!`, 'info');
+        showToast(`Sale revoked. ${price} Points refunded to ${teamName}!`, 'info');
     } catch (err) {
         console.error('Revoke failed:', err);
         showToast('Failed to revoke purchase', 'error');
@@ -965,9 +964,9 @@ function openTeamSquadModal(teamId) {
     const ownerMeta = team.owner_name ? ` • 👑 Owner: ${team.owner_name}` : '';
     document.getElementById('team-squad-meta').textContent = `${team.department} Franchise • ${team.squad_count || 0} Players Acquired${ownerMeta}`;
 
-    document.getElementById('team-stat-purse').textContent = `₹${team.total_budget.toFixed(1)} L`;
-    document.getElementById('team-stat-spent').textContent = `₹${team.spent.toFixed(1)} L`;
-    document.getElementById('team-stat-balance').textContent = `₹${team.leftover_balance.toFixed(1)} L`;
+    document.getElementById('team-stat-purse').textContent = `${team.total_budget.toFixed(1)} Pts`;
+    document.getElementById('team-stat-spent').textContent = `${team.spent.toFixed(1)} Pts`;
+    document.getElementById('team-stat-balance').textContent = `${team.leftover_balance.toFixed(1)} Pts`;
 
     const squadBody = document.getElementById('team-squad-table-body');
     const squad = team.squad || [];
@@ -986,8 +985,8 @@ function openTeamSquadModal(teamId) {
                 <tr class="hover:bg-slate-900/60">
                     <td class="py-3 px-4 font-bold text-white">${pName}</td>
                     <td class="py-3 px-3 text-slate-400">${pRole}</td>
-                    <td class="py-3 px-3 font-mono text-slate-400">₹${pBase} L</td>
-                    <td class="py-3 px-3 font-mono font-bold text-lime-400">₹${pSold} L</td>
+                    <td class="py-3 px-3 font-mono text-slate-400">${pBase} Pts</td>
+                    <td class="py-3 px-3 font-mono font-bold text-lime-400">${pSold} Pts</td>
                     <td class="py-3 px-4 text-right">
                         <button type="button" onclick="closeTeamSquadModal(); handleRevokePurchase('${pId}')"
                             class="text-xs text-rose-400 hover:text-rose-300 font-semibold underline">
@@ -1036,7 +1035,7 @@ function exportRosterToCsv() {
     }
 
     const dataToExport = filteredPlayers.length ? filteredPlayers : allPlayers;
-    const headers = ['Full Name', 'Enrollment No', 'Department', 'Email', 'Gender', 'Role', 'Base Price (Lakh)', 'Auction Status', 'Sold To Team', 'Purchase Price (Lakh)', 'Clearance Status', 'Registration Date'];
+    const headers = ['Full Name', 'Enrollment No', 'Department', 'Email', 'Gender', 'Role', 'Base Points', 'Auction Status', 'Sold To Team', 'Purchase Points', 'Clearance Status', 'Registration Date'];
 
     const rows = dataToExport.map(p => [
         `"${(p.full_name || p.name || '').replace(/"/g, '""')}"`,

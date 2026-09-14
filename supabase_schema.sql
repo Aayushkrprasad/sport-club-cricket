@@ -124,7 +124,7 @@ create policy "Allow public insert teams"
     for insert 
     with check (true);
 
--- Seed Default University Department Franchises (Purse: 100 Lakhs each)
+-- Seed Default University Department Franchises (Purse: 100 Points each)
 insert into public.teams (id, name, department, logo, color, total_budget)
 values 
     ('team-btech', 'B.Tech Titans', 'B.Tech', '⚡', '#38bdf8', 100),

@@ -177,9 +177,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         const spent = Number(currentTeam.spent) || 0;
         const squadCount = currentSquad.length;
 
-        if (hudLeftover) hudLeftover.textContent = `₹${leftover.toFixed(1)} L`;
-        if (hudSpent) hudSpent.textContent = `₹${spent.toFixed(1)} L`;
-        if (hudTotal) hudTotal.textContent = `₹${total.toFixed(1)} L`;
+        if (hudLeftover) hudLeftover.textContent = `${leftover.toFixed(1)} Pts`;
+        if (hudSpent) hudSpent.textContent = `${spent.toFixed(1)} Pts`;
+        if (hudTotal) hudTotal.textContent = `${total.toFixed(1)} Pts`;
         if (hudSquadCount) hudSquadCount.textContent = squadCount;
         if (tabSquadBadge) tabSquadBadge.textContent = squadCount;
 
@@ -197,14 +197,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Average and Top Bid
         if (squadCount > 0) {
             const avg = (spent / squadCount).toFixed(1);
-            if (hudAvgPrice) hudAvgPrice.textContent = `₹${avg} L`;
+            if (hudAvgPrice) hudAvgPrice.textContent = `${avg} Pts`;
 
             const topPlayer = [...currentSquad].sort((a, b) => (Number(b.sold_price) || 0) - (Number(a.sold_price) || 0))[0];
             if (hudTopBid && topPlayer) {
-                hudTopBid.textContent = `${topPlayer.full_name || topPlayer.name} (₹${topPlayer.sold_price}L)`;
+                hudTopBid.textContent = `${topPlayer.full_name || topPlayer.name} (${topPlayer.sold_price} Pts)`;
             }
         } else {
-            if (hudAvgPrice) hudAvgPrice.textContent = `₹0.0 L`;
+            if (hudAvgPrice) hudAvgPrice.textContent = `0 Pts`;
             if (hudTopBid) hudTopBid.textContent = `None`;
         }
 
@@ -297,7 +297,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <!-- Acquired Price Footer -->
                     <div class="pt-3 border-t border-slate-800/80 flex items-center justify-between bg-slate-950/60 -mx-5 -mb-5 p-4 rounded-b-3xl">
                         <span class="text-xs text-slate-400 font-semibold">Purchase Price:</span>
-                        <span class="font-mono font-black text-lime-400 text-sm">₹${price.toFixed(1)} Lakh</span>
+                        <span class="font-mono font-black text-lime-400 text-sm">${price.toFixed(1)} Points</span>
                     </div>
                 </div>
             `;
@@ -343,7 +343,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         <span class="px-2.5 py-1 rounded-xl text-[11px] font-bold border ${teamBadgeClass}">
                             ${player.sold_to_team || 'Franchise'}
                         </span>
-                        <span class="font-mono font-black text-white text-xs">₹${Number(player.sold_price || 0).toFixed(1)}L</span>
+                        <span class="font-mono font-black text-white text-xs">${Number(player.sold_price || 0).toFixed(1)} Pts</span>
                     </div>
                 </div>
             `;
@@ -382,7 +382,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     </div>
                     <div class="flex items-center justify-between text-[11px] text-slate-400 pt-1 border-t border-slate-900">
                         <span>Base Price:</span>
-                        <span class="font-mono font-bold text-lime-400">₹${basePrice.toFixed(1)}L</span>
+                        <span class="font-mono font-bold text-lime-400">${basePrice.toFixed(1)} Pts</span>
                     </div>
                 </div>
             `;
@@ -442,20 +442,20 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (event.type === 'PLAYER_PURCHASED') {
                 const isOurPurchase = currentTeam && (event.teamId === currentTeam.id || event.teamName === currentTeam.name);
                 if (isOurPurchase) {
-                    showToast(`🎉 Squad Acquisition! Purchased for ₹${event.soldPrice} Lakh!`, 'success');
+                    showToast(`🎉 Squad Acquisition! Purchased for ${event.soldPrice} Points!`, 'success');
                 } else {
-                    showToast(`Deal Alert: Player acquired by ${event.teamName} for ₹${event.soldPrice}L`, 'info');
+                    showToast(`Deal Alert: Player acquired by ${event.teamName} for ${event.soldPrice} Pts`, 'info');
                 }
                 await loadFranchiseData();
             } else if (event.type === 'PLAYER_PURCHASE_REVOKED') {
                 const isOurRefund = currentTeam && (event.refundedTeam === currentTeam.name);
                 if (isOurRefund) {
-                    showToast(`Purchase revoked. ₹${event.refundedPrice} Lakh restored to your purse!`, 'info');
+                    showToast(`Purchase revoked. ${event.refundedPrice} Points restored to your purse!`, 'info');
                 }
                 await loadFranchiseData();
             } else if (event.type === 'TEAM_BUDGET_UPDATED') {
                 if (currentTeam && event.teamId === currentTeam.id) {
-                    showToast(`Franchise budget updated to ₹${event.totalBudget} Lakh`, 'info');
+                    showToast(`Franchise budget updated to ${event.totalBudget} Points`, 'info');
                 }
                 await loadFranchiseData();
             } else if (event.type === 'PLAYER_REGISTERED' || event.type === 'ROLE_BASE_PRICES_UPDATED' || event.type === 'SUPABASE_REALTIME') {

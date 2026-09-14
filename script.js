@@ -385,6 +385,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             sessionStorage.setItem('unibox_active_email', email);
+            enterDashboard(userProfile);
             enterDashboard(userProfile, staySignedIn);
             loginForm.reset();
             if (staySignedInCheckbox) staySignedInCheckbox.checked = false;
@@ -575,7 +576,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const basePrice = (profile.base_price !== undefined && profile.base_price !== null && profile.base_price !== '') 
             ? Number(profile.base_price) 
             : defaultRoleBasePrice;
-        setInnerText('dash-player-base-price', `₹${basePrice.toFixed(1)} Lakh`);
+        setInnerText('dash-player-base-price', `${basePrice.toFixed(1)} Pts`);
 
         const auctionStatusContainer = document.getElementById('dash-auction-status-container');
         if (auctionStatusContainer) {
@@ -584,7 +585,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const soldPrice = profile.sold_price !== undefined ? Number(profile.sold_price) : basePrice;
                 auctionStatusContainer.innerHTML = `
                     <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-emerald-400/10 text-emerald-400 border border-emerald-400/30">
-                        <span class="w-2 h-2 rounded-full bg-emerald-400"></span> Sold to ${profile.sold_to_team} (₹${soldPrice.toFixed(1)} Lakh)
+                        <span class="w-2 h-2 rounded-full bg-emerald-400"></span> Sold to ${profile.sold_to_team} (${soldPrice.toFixed(1)} Pts)
                     </span>
                 `;
             } else {
