@@ -13,6 +13,11 @@ yarn-error.log*
 Thumbs.db
 desktop.ini
 
+# Build output
+dist/
+dist-ssr/
+*.local
+
 # IDE & Editor settings
 .vscode/
 .idea/

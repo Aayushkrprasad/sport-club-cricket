@@ -43,13 +43,16 @@ const DEFAULT_ROLE_BASE_PRICES = {
     'Fielder': 5
 };
 
-// 4. DEFAULT TOURNAMENT TEAMS (Purse: 100 Points each)
+// 4. DEFAULT TOURNAMENT TEAMS (8 Captain Franchises, Purse: 100 Points each)
 const DEFAULT_TEAMS = [
     { id: 'team-btech', name: 'B.Tech Titans', department: 'B.Tech', logo: '⚡', color: '#38bdf8', total_budget: 100 },
     { id: 'team-bca', name: 'BCA Blasters', department: 'BCA', logo: '🏏', color: '#a3e635', total_budget: 100 },
     { id: 'team-bba', name: 'BBA Bulls', department: 'BBA', logo: '🐂', color: '#fbbf24', total_budget: 100 },
     { id: 'team-mca', name: 'MCA Mavericks', department: 'MCA', logo: '🦅', color: '#34d399', total_budget: 100 },
-    { id: 'team-mba', name: 'MBA Monarchs', department: 'MBA', logo: '👑', color: '#c084fc', total_budget: 100 }
+    { id: 'team-mba', name: 'MBA Monarchs', department: 'MBA', logo: '👑', color: '#c084fc', total_budget: 100 },
+    { id: 'team-mtech', name: 'M.Tech Warriors', department: 'M.Tech', logo: '🗡️', color: '#f43f5e', total_budget: 100 },
+    { id: 'team-diploma', name: 'Diploma Defenders', department: 'Diploma', logo: '🛡️', color: '#6366f1', total_budget: 100 },
+    { id: 'team-phd', name: 'Ph.D Panthers', department: 'Ph.D', logo: '🐾', color: '#ec4899', total_budget: 100 }
 ];
 
 // BroadcastChannel for instant multi-tab zero-latency realtime synchronization
@@ -492,6 +495,11 @@ const UniBoxDb = {
             throw new Error(`Insufficient budget! ${targetTeam.name} has only ${targetTeam.leftover_balance} Points remaining, but purchase price is ${numPrice} Points.`);
         }
 
+        const currentSquadSize = targetTeam.squad_count || (targetTeam.squad ? targetTeam.squad.length : 0);
+        if (currentSquadSize >= 8) {
+            throw new Error(`Squad Full! ${targetTeam.name} already has the maximum squad capacity of 8 players.`);
+        }
+
         // Update local auction cache
         const auctionCache = JSON.parse(localStorage.getItem('unibox_auction_players_cache') || '{}');
         if (!auctionCache[playerIdOrEmail]) auctionCache[playerIdOrEmail] = {};
@@ -608,6 +616,85 @@ const UniBoxDb = {
         });
 
         return { success: true, refundedTeam, refundedPrice };
+    },
+
+    // --- LIVE AUCTION ROOM ARENA METHODS ---
+    getActiveAuctionRoomState: () => {
+        try {
+            const stored = localStorage.getItem('unibox_live_auction_room_state');
+            if (stored) return JSON.parse(stored);
+        } catch (e) {}
+        return {
+            activePlayer: null,
+            currentBid: 0,
+            highestBidderTeamId: null,
+            highestBidderTeamName: null,
+            highestBidderLogo: null,
+            highestBidderOwner: null,
+            status: 'IDLE', // IDLE, BIDDING, GOING_ONCE, GOING_TWICE, SOLD, UNSOLD
+            biddingHistory: [],
+            lastUpdate: Date.now()
+        };
+    },
+
+    setActiveAuctionRoomState: (state) => {
+        const payload = { ...state, lastUpdate: Date.now() };
+        localStorage.setItem('unibox_live_auction_room_state', JSON.stringify(payload));
+        UniBoxDb.broadcastAuctionEvent({
+            type: 'AUCTION_ROOM_STATE_UPDATED',
+            state: payload
+        });
+        return payload;
+    },
+
+    placeCaptainBid: async (teamId, incrementPts) => {
+        const room = UniBoxDb.getActiveAuctionRoomState();
+        if (!room.activePlayer || (room.status !== 'BIDDING' && room.status !== 'GOING_ONCE' && room.status !== 'GOING_TWICE')) {
+            throw new Error('No player is currently open for bidding on the auction stage.');
+        }
+
+        // Fetch team details
+        const { data: teams } = await UniBoxDb.getAllTeams();
+        const team = teams.find(t => t.id === teamId || t.name === teamId);
+        if (!team) {
+            throw new Error('Franchise not found.');
+        }
+
+        const squadSize = team.squad_count || (team.squad ? team.squad.length : 0);
+        if (squadSize >= 8) {
+            throw new Error(`Squad Full! ${team.name} already has 8 players.`);
+        }
+
+        const basePrice = Number(room.activePlayer.base_price) || 0;
+        const currentHigh = Number(room.currentBid) || 0;
+        const inc = Number(incrementPts) || 1;
+        const newBid = currentHigh > 0 ? currentHigh + inc : Math.max(basePrice, inc);
+
+        if (newBid > team.leftover_balance) {
+            throw new Error(`Insufficient budget! ${team.name} has only ${team.leftover_balance.toFixed(1)} Pts remaining.`);
+        }
+
+        if (room.highestBidderTeamId === team.id) {
+            throw new Error(`${team.name} already holds the highest bid (${newBid} Pts)!`);
+        }
+
+        room.currentBid = newBid;
+        room.highestBidderTeamId = team.id;
+        room.highestBidderTeamName = team.name;
+        room.highestBidderLogo = team.logo || '🏏';
+        room.highestBidderOwner = team.owner_name || 'Captain';
+        room.status = 'BIDDING';
+        if (!room.biddingHistory) room.biddingHistory = [];
+        room.biddingHistory.unshift({
+            teamId: team.id,
+            teamName: team.name,
+            logo: team.logo || '🏏',
+            owner: team.owner_name || 'Captain',
+            amount: newBid,
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+        });
+
+        return UniBoxDb.setActiveAuctionRoomState(room);
     },
 
     // Realtime Event Broadcaster
@@ -822,9 +909,11 @@ const UniBoxDb = {
     // Fetch player profile by email
     getPlayerByEmail: async (email) => {
         let player = null;
+        if (!email) return { data: null, error: 'Email is required' };
+        const lowerEmail = email.trim().toLowerCase();
         if (!UniBoxDb.isReady()) {
             const localPlayers = JSON.parse(localStorage.getItem('unibox_players') || '[]');
-            player = localPlayers.find(p => p.email.toLowerCase() === email.toLowerCase());
+            player = localPlayers.find(p => p.email && p.email.toLowerCase() === lowerEmail);
         } else {
             try {
                 const { data, error } = await supabaseClient
@@ -837,7 +926,7 @@ const UniBoxDb = {
             } catch (error) {
                 console.error('Failed to fetch player from Supabase:', error);
                 const localPlayers = JSON.parse(localStorage.getItem('unibox_players') || '[]');
-                player = localPlayers.find(p => p.email.toLowerCase() === email.toLowerCase());
+                player = localPlayers.find(p => p.email && p.email.toLowerCase() === lowerEmail);
             }
         }
 
@@ -1017,9 +1106,9 @@ const UniBoxDb = {
             }
         }
 
-        // Built-in Default Coordinator Credential Fallback (admin / admin2026)
-        const defaultHash = '819ad992a50989f76e1e5fe6d2167e370dabae02fb8ac8b0add58c6a23134f23';
-        if ((trimmed.toLowerCase() === 'admin' || trimmed.toLowerCase() === 'admin@unibox.com') && inputHash === defaultHash) {
+        // Built-in Default Coordinator Credential Fallback (admin / aayush2410)
+        const defaultHash = '62b2af84c3dec37c356a9374133e2f141e9e3ba6209f5d6ac58d9d2ab8095163';
+        if ((trimmed.toLowerCase() === 'admin' || trimmed.toLowerCase() === 'admin@unibox.com') && (inputHash === defaultHash || password === 'aayush2410')) {
             return {
                 success: true,
                 admin: { username: 'admin', email: 'admin@unibox.com', role: 'Lead Coordinator' },
