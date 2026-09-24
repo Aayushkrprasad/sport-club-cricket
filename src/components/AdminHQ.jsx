@@ -8,7 +8,7 @@ import {
   getAllStudents, updateStudentStatus, updateStudentDetails, deleteStudent,
   getAllTeams, updateTeamBudget, updateTeamOwner,
   getActiveAuctionRoomState, setActiveAuctionRoomState, broadcastAuctionEvent,
-  exportTournamentCSV
+  exportTournamentCSV, purchasePlayer
 } from '../services/db';
 import { playBidTone, playHammerThump, playSoldFanfare } from '../services/audio';
 
@@ -119,18 +119,23 @@ export default function AdminHQ({ onOpenCertViewer }) {
     broadcastAuctionEvent({ type: 'PLAYER_STAGE', player });
   };
 
-  const handlePlaceBidOnBehalf = (team) => {
+  const handlePlaceBidOnBehalf = (team, increment = 5) => {
     if (!auctionRoom.activePlayer) {
       alert('No player is currently on stage.');
       return;
     }
 
-    const nextBid = auctionRoom.currentBid + 5;
+    const nextBid = auctionRoom.currentBid + increment;
+    if (nextBid > (team.leftover_balance || 100)) {
+      alert(`Insufficient budget! ${team.name} has only ${team.leftover_balance || 100} Pts remaining.`);
+      return;
+    }
+
     const updatedHistory = [
       {
         teamName: team.name,
         teamLogo: team.logo,
-        amount: nextBid,
+        bidAmount: nextBid,
         timestamp: new Date().toLocaleTimeString()
       },
       ...(auctionRoom.biddingHistory || [])
@@ -148,10 +153,51 @@ export default function AdminHQ({ onOpenCertViewer }) {
 
     setActiveAuctionRoomState(updatedRoom);
     setAuctionRoom(updatedRoom);
-    setTimerSeconds(15);
-    setIsTimerRunning(true);
     playBidTone();
     broadcastAuctionEvent({ type: 'NEW_BID', team, amount: nextBid });
+  };
+
+  const handleSetCustomBidOnBehalf = (team, targetAmount) => {
+    if (!auctionRoom.activePlayer) {
+      alert('No player is currently on stage.');
+      return;
+    }
+
+    const numAmount = Number(targetAmount);
+    if (isNaN(numAmount) || numAmount <= auctionRoom.currentBid) {
+      alert(`Bid amount must be greater than current bid (${auctionRoom.currentBid} Pts).`);
+      return;
+    }
+
+    if (numAmount > (team.leftover_balance || 100)) {
+      alert(`Insufficient budget! ${team.name} has only ${team.leftover_balance || 100} Pts remaining.`);
+      return;
+    }
+
+    const updatedHistory = [
+      {
+        teamName: team.name,
+        teamLogo: team.logo,
+        bidAmount: numAmount,
+        timestamp: new Date().toLocaleTimeString()
+      },
+      ...(auctionRoom.biddingHistory || [])
+    ];
+
+    const updatedRoom = {
+      ...auctionRoom,
+      status: 'BIDDING',
+      currentBid: numAmount,
+      highestBidderTeamId: team.id,
+      highestBidderTeamName: team.name,
+      highestBidderLogo: team.logo,
+      biddingHistory: updatedHistory
+    };
+
+    setActiveAuctionRoomState(updatedRoom);
+    setAuctionRoom(updatedRoom);
+    playBidTone();
+    broadcastAuctionEvent({ type: 'NEW_BID', team, amount: numAmount });
   };
 
   const handleMarkSold = async () => {
@@ -161,14 +207,20 @@ export default function AdminHQ({ onOpenCertViewer }) {
     }
 
     const player = auctionRoom.activePlayer;
+    const teamId = auctionRoom.highestBidderTeamId;
     const teamName = auctionRoom.highestBidderTeamName;
     const price = auctionRoom.currentBid;
 
-    await updateStudentStatus(player.id, 'Approved', {
-      sold_to_team: teamName,
-      sold_price: price,
-      auction_status: 'Sold'
-    });
+    try {
+      await purchasePlayer({
+        playerIdOrEmail: player.id,
+        teamId: teamId,
+        soldPrice: price
+      });
+    } catch (err) {
+      alert(err.message || 'Failed to complete player purchase.');
+      return;
+    }
 
     const soldRoomState = {
       ...auctionRoom,
@@ -181,7 +233,7 @@ export default function AdminHQ({ onOpenCertViewer }) {
     playSoldFanfare();
     playHammerThump();
     broadcastAuctionEvent({ type: 'PLAYER_SOLD', player, teamName, price });
-    loadData();
+    await loadData();
   };
 
   const handleMarkUnsold = async () => {
@@ -479,22 +531,54 @@ export default function AdminHQ({ onOpenCertViewer }) {
               </div>
             )}
 
-            {/* Quick Franchise Bidding Triggers (Admin Proxy Bidding) */}
-            <div className="space-y-3">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">Place Bid on Behalf of Franchise (+5 Pts)</h3>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            {/* Franchise Bidding Triggers (Admin Proxy Bidding & Custom Bid) */}
+            <div className="space-y-4 pt-2 border-t border-slate-800">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">Place Bid on Behalf of Franchise</h3>
+                <span className="text-[11px] text-slate-500">Quick Bids or enter custom amount (e.g. 80 Pts)</span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {teams.map(t => (
-                  <button
-                    key={t.id}
-                    onClick={() => handlePlaceBidOnBehalf(t)}
-                    className="p-3 bg-slate-950 hover:bg-slate-800 border border-slate-800 hover:border-lime-400/50 rounded-xl transition-all text-left flex items-center gap-2 cursor-pointer group"
-                  >
-                    <span className="text-xl">{t.logo || '🏏'}</span>
-                    <div className="truncate">
-                      <p className="text-xs font-bold text-white group-hover:text-lime-400 truncate">{t.name}</p>
-                      <p className="text-[10px] text-slate-500 font-mono">Purse: {t.total_budget || 100} Pts</p>
+                  <div key={t.id} className="p-3 bg-slate-950 border border-slate-800 hover:border-slate-700 rounded-xl space-y-2">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2 truncate">
+                        <span className="text-xl">{t.logo || '🏏'}</span>
+                        <div className="truncate">
+                          <p className="text-xs font-bold text-white truncate">{t.name}</p>
+                          <p className="text-[10px] text-slate-500 font-mono">Purse: {t.leftover_balance ?? t.total_budget ?? 100} Pts</p>
+                        </div>
+                      </div>
                     </div>
-                  </button>
+
+                    {/* Quick Increments + Custom Bid */}
+                    <div className="flex items-center gap-1.5 pt-1">
+                      {[5, 10, 25, 50].map(inc => (
+                        <button
+                          key={inc}
+                          onClick={() => handlePlaceBidOnBehalf(t, inc)}
+                          className="px-2.5 py-1.5 bg-slate-900 hover:bg-lime-400 hover:text-slate-950 border border-slate-800 text-lime-400 font-bold text-xs rounded-lg transition-all cursor-pointer"
+                          title={`+${inc} Pts`}
+                        >
+                          +{inc}
+                        </button>
+                      ))}
+
+                      {/* Custom Direct Bid Input */}
+                      <button
+                        onClick={() => {
+                          const customInput = prompt(`Enter custom target bid for ${t.name} (Current: ${auctionRoom.currentBid} Pts):`, String(auctionRoom.currentBid + 10));
+                          if (customInput) {
+                            handleSetCustomBidOnBehalf(t, customInput);
+                          }
+                        }}
+                        className="px-2.5 py-1.5 bg-amber-500/10 hover:bg-amber-400 hover:text-slate-950 border border-amber-500/30 text-amber-400 font-bold text-xs rounded-lg transition-all cursor-pointer ml-auto"
+                        title="Enter Custom Bid Price"
+                      >
+                        ⚡ Custom Price
+                      </button>
+                    </div>
+                  </div>
                 ))}
               </div>
             </div>

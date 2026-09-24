@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Crown, Zap, Shield, Plus, Lock, Users, Wallet, LogOut, CheckCircle2 } from 'lucide-react';
-import { getAllTeams, loginTeamOwner, registerTeamOwner, getActiveAuctionRoomState, setActiveAuctionRoomState, broadcastAuctionEvent } from '../services/db';
+import { getAllTeams, loginTeamOwner, registerTeamOwner, getActiveAuctionRoomState, setActiveAuctionRoomState, broadcastAuctionEvent, subscribeToAuctionUpdates } from '../services/db';
 import { playBidTone } from '../services/audio';
 
 export default function CaptainPortal({ auctionRoomState }) {
   const [session, setSession] = useState(null);
   const [activeTab, setActiveTab] = useState('login'); // 'login' or 'register'
   
+  // Custom Bid State
+  const [customBid, setCustomBid] = useState('');
+
   // Login State
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
@@ -33,6 +36,11 @@ export default function CaptainPortal({ auctionRoomState }) {
         setSession(JSON.parse(saved));
       } catch (e) {}
     }
+
+    const unsubscribe = subscribeToAuctionUpdates(() => {
+      loadTeams();
+    });
+    return () => unsubscribe();
   }, []);
 
   const loadTeams = async () => {
@@ -112,13 +120,13 @@ export default function CaptainPortal({ auctionRoomState }) {
       return;
     }
 
-    const newHistory = [...(room.biddingHistory || []), {
+    const newHistory = [{
       teamId: myTeam.id,
       teamName: myTeam.name,
       logo: myTeam.logo,
       bidAmount: nextBid,
       timestamp: Date.now()
-    }];
+    }, ...(room.biddingHistory || [])];
 
     const newState = {
       ...room,
@@ -133,6 +141,56 @@ export default function CaptainPortal({ auctionRoomState }) {
 
     setActiveAuctionRoomState(newState);
     playBidTone();
+  };
+
+  const handlePlaceCustomBid = (e) => {
+    if (e) e.preventDefault();
+    if (!myTeam) return;
+    const room = getActiveAuctionRoomState();
+
+    if (!room.activePlayer) {
+      alert('No player is currently on stage for bidding.');
+      return;
+    }
+
+    if (myTeam.squad_count >= 8) {
+      alert(`Squad Full! ${myTeam.name} already has maximum 8 players.`);
+      return;
+    }
+
+    const targetBid = Number(customBid);
+    if (isNaN(targetBid) || targetBid <= (room.currentBid || 0)) {
+      alert(`Custom bid must be greater than current stage bid (${room.currentBid || 0} Pts).`);
+      return;
+    }
+
+    if (targetBid > myTeam.leftover_balance) {
+      alert(`Insufficient budget! ${myTeam.name} has only ${myTeam.leftover_balance} Pts remaining.`);
+      return;
+    }
+
+    const newHistory = [{
+      teamId: myTeam.id,
+      teamName: myTeam.name,
+      logo: myTeam.logo,
+      bidAmount: targetBid,
+      timestamp: Date.now()
+    }, ...(room.biddingHistory || [])];
+
+    const newState = {
+      ...room,
+      currentBid: targetBid,
+      highestBidderTeamId: myTeam.id,
+      highestBidderTeamName: myTeam.name,
+      highestBidderLogo: myTeam.logo,
+      highestBidderOwner: myTeam.owner_name,
+      status: 'BIDDING',
+      biddingHistory: newHistory
+    };
+
+    setActiveAuctionRoomState(newState);
+    playBidTone();
+    setCustomBid('');
   };
 
   // Render Login/Register Screen if not authenticated
@@ -412,24 +470,44 @@ export default function CaptainPortal({ auctionRoomState }) {
               </div>
             </div>
 
-            {/* Incremental Bidding Buttons */}
+            {/* Incremental & Custom Bidding Controls */}
             <div className="md:col-span-5 space-y-3">
-              <div className="text-center">
-                <span className="text-xs font-bold text-slate-400 uppercase">Current Bid</span>
+              <div className="text-center bg-slate-950 p-3 rounded-2xl border border-slate-800">
+                <span className="text-xs font-bold text-slate-400 uppercase block">Current Stage Bid</span>
                 <div className="text-3xl font-black font-mono text-lime-400">{currentBid} Pts</div>
               </div>
 
+              {/* Quick Increments */}
               <div className="grid grid-cols-4 gap-2">
-                {[1, 2, 5, 10].map((inc) => (
+                {[5, 10, 20, 50].map((inc) => (
                   <button
                     key={inc}
                     onClick={() => handlePlaceBid(inc)}
-                    className="py-3 rounded-xl bg-gradient-to-r from-lime-400 to-emerald-500 hover:from-lime-500 hover:to-emerald-600 text-slate-950 font-black text-sm shadow-lg shadow-lime-400/20 active:scale-95 transition-all cursor-pointer"
+                    className="py-2.5 rounded-xl bg-gradient-to-r from-lime-400 to-emerald-500 hover:from-lime-500 hover:to-emerald-600 text-slate-950 font-black text-xs shadow-lg shadow-lime-400/20 active:scale-95 transition-all cursor-pointer"
                   >
-                    +{inc} Pt
+                    +{inc} Pts
                   </button>
                 ))}
               </div>
+
+              {/* Custom Bid Direct Input */}
+              <form onSubmit={handlePlaceCustomBid} className="flex gap-2">
+                <input
+                  type="number"
+                  min={currentBid + 1}
+                  max={myTeam.leftover_balance}
+                  value={customBid}
+                  onChange={(e) => setCustomBid(e.target.value)}
+                  placeholder={`Set custom price (e.g. 80)`}
+                  className="bg-slate-950 border border-slate-800 text-white text-xs font-mono rounded-xl px-3 py-2.5 flex-1 focus:outline-none focus:border-amber-400"
+                />
+                <button
+                  type="submit"
+                  className="bg-amber-400 hover:bg-amber-500 text-slate-950 font-black text-xs px-4 py-2.5 rounded-xl transition-all shadow-md shrink-0 cursor-pointer"
+                >
+                  ⚡ Bid Direct
+                </button>
+              </form>
             </div>
           </div>
         ) : (
