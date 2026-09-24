@@ -552,12 +552,12 @@ export default function AdminHQ({ onOpenCertViewer }) {
                     </div>
 
                     {/* Quick Increments + Custom Bid */}
-                    <div className="flex items-center gap-1.5 pt-1">
-                      {[5, 10, 25, 50].map(inc => (
+                    <div className="flex items-center gap-1 pt-1 overflow-x-auto">
+                      {[2, 4, 6, 8, 10].map(inc => (
                         <button
                           key={inc}
                           onClick={() => handlePlaceBidOnBehalf(t, inc)}
-                          className="px-2.5 py-1.5 bg-slate-900 hover:bg-lime-400 hover:text-slate-950 border border-slate-800 text-lime-400 font-bold text-xs rounded-lg transition-all cursor-pointer"
+                          className="px-2 py-1 bg-slate-900 hover:bg-lime-400 hover:text-slate-950 border border-slate-800 text-lime-400 font-bold text-xs rounded-lg transition-all cursor-pointer"
                           title={`+${inc} Pts`}
                         >
                           +{inc}

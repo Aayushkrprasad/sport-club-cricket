@@ -159,8 +159,15 @@ export default function CaptainPortal({ auctionRoomState }) {
     }
 
     const targetBid = Number(customBid);
+    const maxAllowedCustomBid = (room.currentBid || 0) + 10;
+
     if (isNaN(targetBid) || targetBid <= (room.currentBid || 0)) {
       alert(`Custom bid must be greater than current stage bid (${room.currentBid || 0} Pts).`);
+      return;
+    }
+
+    if (targetBid > maxAllowedCustomBid) {
+      alert(`Custom bid limit exceeded! Maximum allowed increment per bid is +10 Pts (Max allowed bid: ${maxAllowedCustomBid} Pts).`);
       return;
     }
 
@@ -477,28 +484,28 @@ export default function CaptainPortal({ auctionRoomState }) {
                 <div className="text-3xl font-black font-mono text-lime-400">{currentBid} Pts</div>
               </div>
 
-              {/* Quick Increments */}
-              <div className="grid grid-cols-4 gap-2">
-                {[5, 10, 20, 50].map((inc) => (
+              {/* Quick Increments: +2, +4, +6, +8, +10 */}
+              <div className="grid grid-cols-5 gap-1.5">
+                {[2, 4, 6, 8, 10].map((inc) => (
                   <button
                     key={inc}
                     onClick={() => handlePlaceBid(inc)}
                     className="py-2.5 rounded-xl bg-gradient-to-r from-lime-400 to-emerald-500 hover:from-lime-500 hover:to-emerald-600 text-slate-950 font-black text-xs shadow-lg shadow-lime-400/20 active:scale-95 transition-all cursor-pointer"
                   >
-                    +{inc} Pts
+                    +{inc}
                   </button>
                 ))}
               </div>
 
-              {/* Custom Bid Direct Input */}
+              {/* Custom Bid Direct Input (Max +10 limit) */}
               <form onSubmit={handlePlaceCustomBid} className="flex gap-2">
                 <input
                   type="number"
                   min={currentBid + 1}
-                  max={myTeam.leftover_balance}
+                  max={Math.min(myTeam.leftover_balance, currentBid + 10)}
                   value={customBid}
                   onChange={(e) => setCustomBid(e.target.value)}
-                  placeholder={`Set custom price (e.g. 80)`}
+                  placeholder={`Custom +1 to +10 (Max: ${currentBid + 10})`}
                   className="bg-slate-950 border border-slate-800 text-white text-xs font-mono rounded-xl px-3 py-2.5 flex-1 focus:outline-none focus:border-amber-400"
                 />
                 <button
