@@ -43,9 +43,9 @@ export default function LiveAuctionStadium({
       {/* Hero Header */}
       <div className="text-center relative mb-12">
         <h1 className="text-4xl sm:text-6xl font-black tracking-tight text-white mb-4 leading-[1.1] uppercase">
-          <span className="burning-fast text-white">University</span> <br /> Cricket Auction <br />
+          <span className="burning-fast text-white">Sunstone</span> <br /> Premier League <br />
           <span className="bg-gradient-to-r from-lime-400 via-emerald-400 to-teal-400 bg-clip-text text-transparent">
-            Box Arena 2026
+            Auction Arena 2026
           </span>
         </h1>
 

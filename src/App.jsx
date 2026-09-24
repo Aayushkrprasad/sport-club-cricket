@@ -152,7 +152,7 @@ export default function App() {
       {/* Footer */}
       <footer className="border-t border-slate-900 bg-slate-950/80 backdrop-blur-md py-6 text-center text-xs text-slate-500">
         <div className="max-w-7xl mx-auto px-4">
-          <p>© 2026 UniBox Box Cricket League. All rights reserved.</p>
+          <p>© 2026 Sunstone Premier League. All rights reserved.</p>
         </div>
       </footer>
 

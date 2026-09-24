@@ -15,7 +15,7 @@ export default function RulesModal({ isOpen, onClose }) {
             </div>
             <div>
               <h3 className="text-lg font-bold text-white uppercase">Tournament Rules & Guidelines</h3>
-              <p className="text-xs text-slate-400">Official UniBox Box Cricket Code of Conduct</p>
+              <p className="text-xs text-slate-400">Official Sunstone Premier League Code of Conduct</p>
             </div>
           </div>
           <button

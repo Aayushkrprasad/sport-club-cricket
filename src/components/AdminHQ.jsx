@@ -254,7 +254,7 @@ export default function AdminHQ({ onOpenCertViewer }) {
           </div>
           <div>
             <h2 className="text-2xl font-black text-white uppercase">Admin HQ Access</h2>
-            <p className="text-xs text-slate-400">Box Cricket Tournament Control Center</p>
+            <p className="text-xs text-slate-400">Sunstone Premier League Control Center</p>
           </div>
 
           {authError && (

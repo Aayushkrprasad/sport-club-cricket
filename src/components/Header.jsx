@@ -21,7 +21,7 @@ export default function Header({
             <Trophy className="w-6 h-6 text-slate-950" />
           </div>
           <span className="text-xl font-black tracking-wider uppercase bg-gradient-to-r from-lime-400 to-emerald-400 bg-clip-text text-transparent">
-            UniBox League
+            Sunstone Premier League
           </span>
         </div>
 
